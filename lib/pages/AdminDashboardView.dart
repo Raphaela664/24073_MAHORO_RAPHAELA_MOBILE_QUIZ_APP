@@ -1,3 +1,4 @@
+import 'package:assignment_3/pages/QuizCreationView.dart';
 import 'package:flutter/material.dart';
 
 class AdminDashboard extends StatelessWidget {
@@ -12,15 +13,19 @@ class AdminDashboard extends StatelessWidget {
         children: [
           ElevatedButton(
             onPressed: () {
-              // Navigate to quiz list
+              
             },
             child: Text('View Quiz List'),
           ),
           SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
-              // Navigate to create quiz page
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => QuizCreationView()),
+              );
             },
+            
             child: Text('Create Quiz'),
           ),
           SizedBox(height: 20),
