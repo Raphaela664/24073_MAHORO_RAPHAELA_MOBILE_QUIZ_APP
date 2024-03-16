@@ -11,7 +11,7 @@ class QuizzesView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 100), // Spacer for the image
+            SizedBox(height: 50), // Spacer for the image
             Image.asset(
               'images/quiz1.jpeg', // Replace with your image asset
               height: 200, // Adjust height as needed
@@ -36,7 +36,7 @@ class QuizzesView extends StatelessWidget {
                     return ListView(
                       children: snapshot.data!.docs.map((DocumentSnapshot document) {
                         Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-                        return _buildQuizCard(context, data['title'], document.id);
+                        return _buildQuizCard(context, data['title'], data['id']);
                       }).toList(),
                     );
                   }

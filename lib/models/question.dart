@@ -15,8 +15,19 @@ class Question {
     required this.correctAnswerIndex,
   });
 
+  factory Question.fromJson(Map<String, dynamic> json) {
+    return Question(
+      id: json['id'],
+      quizId: json['quizId'],
+      question_description: json['question_description'],
+      options: List<String>.from(json['options']),
+      correctAnswerIndex: json['correctAnswerIndex'],
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'quizId': quizId,
       'question_description': question_description,
       'options': options,
