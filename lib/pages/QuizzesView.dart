@@ -67,127 +67,86 @@
 //   }
 // }
 
-// import 'package:assignment_3/pages/QuizView.dart';
+
+
+
+
 // import 'package:flutter/material.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:assignment_3/pages/QuizView.dart';
 
 // class QuizzesView extends StatelessWidget {
 //   @override
 //   Widget build(BuildContext context) {
 //     return Scaffold(
-//       body: ListView(
-//         padding: EdgeInsets.all(20.0),
+//       body: Stack(
 //         children: [
-//           // Quiz card 1
-//           _buildQuizCard(context, 'Quiz 1', 'images/quiz1.jpeg'),
-//           SizedBox(height: 20.0),
-//           // Quiz card 2
-//           _buildQuizCard(context, 'Quiz 2', 'images/quiz1.jpeg'),
-//           SizedBox(height: 20.0),
-//           // Add more quiz cards as needed
-//         ],
-//       ),
-//     );
-//   }
-
-//   Widget _buildQuizCard(BuildContext context, String quizTitle, String imageUrl) {
-//     return GestureDetector(
-//       onTap: () {
-//         Navigator.push(
-//           context,
-//           MaterialPageRoute(
-//             builder: (context) => QuizView(), // Passing quiz title as ID
-//           ),
-//         );
-//       },
-//       child: Container(
-//         height: 50,
-//         decoration: BoxDecoration(
-//           borderRadius: BorderRadius.circular(20),
-//           image: DecorationImage(
-//             image: AssetImage(imageUrl),
-//             fit: BoxFit.cover,
-//           ),
-//         ),
-//         child: Container(
-//           padding: EdgeInsets.all(20),
-//           decoration: BoxDecoration(
-//             borderRadius: BorderRadius.circular(20),
-//             gradient: LinearGradient(
-//               begin: Alignment.topCenter,
-//               end: Alignment.bottomCenter,
-//               colors: [Colors.transparent, Colors.black.withOpacity(0.7)],
-//             ),
-//           ),
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             mainAxisAlignment: MainAxisAlignment.end,
-//             children: [
-//               Text(
-//                 quizTitle,
-//                 style: TextStyle(
-//                   color: Colors.white,
-//                   fontSize: 24,
-//                   fontWeight: FontWeight.bold,
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-
-
-// import 'package:assignment_3/pages/QuizView.dart';
-// import 'package:flutter/material.dart';
-
-// class QuizzesView extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: ListView(
-//         padding: EdgeInsets.only(left: 10, right: 10),
-//         children: [
-//           // Quiz image
-//           SizedBox(height: 20.0),
+//           // Background image
 //           Container(
-//             height: 200, 
+//             height: MediaQuery.of(context).size.height,
+//             width: double.infinity,
 //             decoration: BoxDecoration(
-//               borderRadius: BorderRadius.circular(10),
 //               image: DecorationImage(
-//                 image: AssetImage('images/quiz1.jpeg'),
-//                 fit: BoxFit.cover,
+//                 image: AssetImage('images/quiz1.jpeg'), // Replace with your image asset
+//                 fit: BoxFit.fill,
 //               ),
 //             ),
 //           ),
-//           SizedBox(height: 20.0),
-//           // Quiz list
-//           _buildQuizCard(context, 'Quiz 1'),
-//           SizedBox(height: 20.0),
-//           _buildQuizCard(context, 'Quiz 2'),
-//           SizedBox(height: 20.0),
-//           // Add more quiz cards as needed
+//           // Content
+//           Padding(
+//             padding: const EdgeInsets.all(20),
+//             child: Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 SizedBox(height: 100), // Spacer for the image
+//                 Text(
+//                   "Quizzes Available",
+//                   style: TextStyle(fontSize: 23.0, fontWeight: FontWeight.bold, color: Colors.white),
+//                 ),
+//                 SizedBox(height: 30),
+//                 // Quiz list
+//                 Expanded(
+//                   child: StreamBuilder(
+//                     stream: FirebaseFirestore.instance.collection('Quiz').snapshots(),
+//                     builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+//                       if (snapshot.connectionState == ConnectionState.waiting) {
+//                         return Center(child: CircularProgressIndicator());
+//                       } else if (snapshot.hasError) {
+//                         return Center(child: Text('Error: ${snapshot.error}'));
+//                       } else {
+//                         return ListView(
+//                           children: snapshot.data!.docs.map((DocumentSnapshot document) {
+//                             Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+//                             return _buildQuizCard(context, data['title'], document.id);
+//                           }).toList(),
+//                         );
+//                       }
+//                     },
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ),
 //         ],
 //       ),
 //     );
 //   }
 
-//   Widget _buildQuizCard(BuildContext context, String quizTitle) {
+//   Widget _buildQuizCard(BuildContext context, String quizTitle, String quizId) {
 //     return GestureDetector(
 //       onTap: () {
 //         Navigator.push(
 //           context,
 //           MaterialPageRoute(
-//             builder: (context) => QuizView(), // Passing quiz title as ID
+//             builder: (context) => QuizView(quizId: quizId),
 //           ),
 //         );
 //       },
 //       child: Container(
+//         margin: EdgeInsets.only(bottom: 20),
 //         padding: EdgeInsets.all(20),
 //         decoration: BoxDecoration(
-//           color: Colors.white,
+//           color: Colors.white.withOpacity(0.7),
 //           borderRadius: BorderRadius.circular(20),
 //           boxShadow: [
 //             BoxShadow(
@@ -198,8 +157,8 @@
 //             ),
 //           ],
 //         ),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
+//         child: Row(
+//           mainAxisAlignment: MainAxisAlignment.spaceBetween,
 //           children: [
 //             Text(
 //               quizTitle,
@@ -208,7 +167,7 @@
 //                 fontWeight: FontWeight.bold,
 //               ),
 //             ),
-            
+//             Icon(Icons.arrow_forward),
 //           ],
 //         ),
 //       ),
@@ -224,23 +183,45 @@ class QuizzesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: StreamBuilder(
-        stream: FirebaseFirestore.instance.collection('Quiz').snapshots(),
-        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else {
-            return ListView(
-              padding: EdgeInsets.only(left: 10, right: 10),
-              children: snapshot.data!.docs.map((DocumentSnapshot document) {
-                Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-                return _buildQuizCard(context, data['title'], document.id);
-              }).toList(),
-            );
-          }
-        },
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 100), // Spacer for the image
+            Image.asset(
+              'images/quiz1.jpeg', // Replace with your image asset
+              height: 200, // Adjust height as needed
+              width: double.infinity, // Take full width
+              fit: BoxFit.cover, // Cover the entire space
+            ),
+            SizedBox(height: 30),
+            Text(
+              "Quizzes Available",
+              style: TextStyle(fontSize: 23.0, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 30),
+            Expanded(
+              child: StreamBuilder(
+                stream: FirebaseFirestore.instance.collection('Quiz').snapshots(),
+                builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else {
+                    return ListView(
+                      children: snapshot.data!.docs.map((DocumentSnapshot document) {
+                        Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+                        return _buildQuizCard(context, data['title'], document.id);
+                      }).toList(),
+                    );
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -256,9 +237,10 @@ class QuizzesView extends StatelessWidget {
         );
       },
       child: Container(
+        margin: EdgeInsets.only(bottom: 20),
         padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.white.withOpacity(0.7),
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
@@ -269,8 +251,8 @@ class QuizzesView extends StatelessWidget {
             ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
               quizTitle,
@@ -279,6 +261,7 @@ class QuizzesView extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
+            Icon(Icons.arrow_forward),
           ],
         ),
       ),
