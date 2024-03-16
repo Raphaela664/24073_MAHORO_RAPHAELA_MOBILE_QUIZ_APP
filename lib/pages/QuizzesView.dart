@@ -140,47 +140,118 @@
 
 
 
-import 'package:assignment_3/pages/QuizView.dart';
+// import 'package:assignment_3/pages/QuizView.dart';
+// import 'package:flutter/material.dart';
+
+// class QuizzesView extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       body: ListView(
+//         padding: EdgeInsets.only(left: 10, right: 10),
+//         children: [
+//           // Quiz image
+//           SizedBox(height: 20.0),
+//           Container(
+//             height: 200, 
+//             decoration: BoxDecoration(
+//               borderRadius: BorderRadius.circular(10),
+//               image: DecorationImage(
+//                 image: AssetImage('images/quiz1.jpeg'),
+//                 fit: BoxFit.cover,
+//               ),
+//             ),
+//           ),
+//           SizedBox(height: 20.0),
+//           // Quiz list
+//           _buildQuizCard(context, 'Quiz 1'),
+//           SizedBox(height: 20.0),
+//           _buildQuizCard(context, 'Quiz 2'),
+//           SizedBox(height: 20.0),
+//           // Add more quiz cards as needed
+//         ],
+//       ),
+//     );
+//   }
+
+//   Widget _buildQuizCard(BuildContext context, String quizTitle) {
+//     return GestureDetector(
+//       onTap: () {
+//         Navigator.push(
+//           context,
+//           MaterialPageRoute(
+//             builder: (context) => QuizView(), // Passing quiz title as ID
+//           ),
+//         );
+//       },
+//       child: Container(
+//         padding: EdgeInsets.all(20),
+//         decoration: BoxDecoration(
+//           color: Colors.white,
+//           borderRadius: BorderRadius.circular(20),
+//           boxShadow: [
+//             BoxShadow(
+//               color: Colors.grey.withOpacity(0.5),
+//               spreadRadius: 1,
+//               blurRadius: 5,
+//               offset: Offset(0, 3),
+//             ),
+//           ],
+//         ),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             Text(
+//               quizTitle,
+//               style: TextStyle(
+//                 fontSize: 20,
+//                 fontWeight: FontWeight.bold,
+//               ),
+//             ),
+            
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:assignment_3/pages/QuizView.dart';
 
 class QuizzesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
-        padding: EdgeInsets.only(left: 10, right: 10),
-        children: [
-          // Quiz image
-          SizedBox(height: 20.0),
-          Container(
-            height: 200, 
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              image: DecorationImage(
-                image: AssetImage('images/quiz1.jpeg'),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          SizedBox(height: 20.0),
-          // Quiz list
-          _buildQuizCard(context, 'Quiz 1'),
-          SizedBox(height: 20.0),
-          _buildQuizCard(context, 'Quiz 2'),
-          SizedBox(height: 20.0),
-          // Add more quiz cards as needed
-        ],
+      body: StreamBuilder(
+        stream: FirebaseFirestore.instance.collection('Quiz').snapshots(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            return ListView(
+              padding: EdgeInsets.only(left: 10, right: 10),
+              children: snapshot.data!.docs.map((DocumentSnapshot document) {
+                Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+                return _buildQuizCard(context, data['title'], document.id);
+              }).toList(),
+            );
+          }
+        },
       ),
     );
   }
 
-  Widget _buildQuizCard(BuildContext context, String quizTitle) {
+  Widget _buildQuizCard(BuildContext context, String quizTitle, String quizId) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => QuizView(), // Passing quiz title as ID
+            builder: (context) => QuizView(quizId: quizId),
           ),
         );
       },
@@ -208,7 +279,6 @@ class QuizzesView extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            
           ],
         ),
       ),

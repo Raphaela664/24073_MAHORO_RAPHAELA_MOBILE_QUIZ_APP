@@ -50,6 +50,7 @@ dependencies:
   ionicons: ^0.2.2
   cloud_firestore: 4.15.7
   get: ^4.6.6
+  uuid: ^3.0.4
 
 dev_dependencies:
   flutter_test:
