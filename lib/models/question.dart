@@ -1,5 +1,7 @@
+import 'package:uuid/uuid.dart';
+
 class Question {
-  final String? id;
+  final String id;
   String? quizId;
   String question_description;
   List<String> options;
@@ -8,12 +10,12 @@ class Question {
   String? correctAnswer;
 
   Question({
-    this.id,
+    String? id,
     this.quizId,
     required this.question_description,
     required this.options,
     required this.correctAnswerIndex,
-  });
+  }) : id = id ?? Uuid().v4();
 
   factory Question.fromJson(Map<String, dynamic> json) {
     return Question(
