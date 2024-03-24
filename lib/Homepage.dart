@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:assignment_3/pages/AdminDashboardView.dart';
 import 'package:assignment_3/pages/ContactPage.dart';
+import 'package:assignment_3/pages/LocationView.dart';
 import 'package:assignment_3/pages/QuizzesView.dart';
 import 'package:assignment_3/provider/theme.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -35,20 +36,32 @@ class _HomepageState extends State<Homepage> {
     CalculatorView(),
     ContactPage(),
     AdminDashboard(),
+    MapPage()
   ];
 
   @override
   void initState() {
     super.initState();
-    Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
-      if (_previousConnectivity == ConnectivityResult.none &&
-          (result == ConnectivityResult.mobile ||
-              result == ConnectivityResult.wifi)) {
-        _showOnlineSnackBar(context);
-      }
-      _previousConnectivity = result;
-    });
-    _previousConnectivity = ConnectivityResult.mobile;
+    checkInternetConnectivity();
+  }
+   void checkInternetConnectivity() async {
+    ConnectivityResult connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      showOfflineSnackbar();
+    }
+  }
+
+  void showOfflineSnackbar() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('You are offline'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  void hideOfflineSnackbar() {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
   final user = FirebaseAuth.instance.currentUser; 
   void signerUserOut(){
@@ -176,6 +189,13 @@ class _HomepageState extends State<Homepage> {
               leading: Icon(Icons.dashboard, size: 26, color: Colors.black),
               title: Text('Dashboard', style: TextStyle(fontSize: 26)),
             ),
+            ListTile(
+              onTap: () {
+                _selectPage(4);
+              },
+              leading: Icon(Icons.map, size: 26, color: Colors.black),
+              title: Text('Map', style: TextStyle(fontSize: 26)),
+            ),
             Divider(color: Colors.black),
             ListTile(
               onTap: () {},
@@ -185,18 +205,36 @@ class _HomepageState extends State<Homepage> {
           ],
         ),
       ),
+      // body: StreamBuilder<ConnectivityResult>(
+      //   stream: Connectivity().onConnectivityChanged,
+      //   builder: (context, snapshot) {
+      //     if (snapshot.hasData) {
+      //       ConnectivityResult result = snapshot.data!;
+      //       if (result == ConnectivityResult.none) {
+      //         return internet_connectivity();
+      //       } else {
+      //         return _pages[_selectedIndex];
+      //       }
+      //     } else {
+      //       return CircularProgressIndicator();
+      //     }
+      //   },
+      // ),
       body: StreamBuilder<ConnectivityResult>(
         stream: Connectivity().onConnectivityChanged,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
+            hideOfflineSnackbar();
             ConnectivityResult result = snapshot.data!;
             if (result == ConnectivityResult.none) {
-              return internet_connectivity();
+               //showOfflineSnackbar();
+              return _pages[_selectedIndex];
             } else {
               return _pages[_selectedIndex];
             }
-          } else {
-            return CircularProgressIndicator();
+          } 
+          else {
+            return _pages[_selectedIndex];
           }
         },
       ),
@@ -326,3 +364,4 @@ class _HomepageState extends State<Homepage> {
     
   }
 }
+

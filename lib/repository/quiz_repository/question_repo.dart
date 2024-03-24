@@ -9,7 +9,7 @@ class QuestionRepository extends GetxController {
   final _db = FirebaseFirestore.instance;
   
   createQuestion(Question question) async {
-    await _db.collection('Questions').add(question.toJson()).whenComplete(() => Get.snackbar('Success', 'Question created successfully.',
+    await _db.collection('questions').add(question.toJson()).whenComplete(() => Get.snackbar('Success', 'Question created successfully.',
     snackPosition: SnackPosition.BOTTOM,
     backgroundColor: Colors.green.withOpacity(0.1),
     colorText: Colors.green),

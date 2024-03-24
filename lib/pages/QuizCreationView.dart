@@ -144,10 +144,11 @@ class _QuizCreationViewState extends State<QuizCreationView> {
   void _saveQuiz() {
     String quizTitle = _quizTitleController.text;
     Quiz quiz = Quiz(
+      id:'',
       title: quizTitle,
       questions: _questions,
     );
-    _quizController.saveQuizWithQuestions(quiz);
+    _quizController.saveQuizWithQuestions(context,quiz);
   }
 }
 

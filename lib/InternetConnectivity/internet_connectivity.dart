@@ -24,7 +24,7 @@ class _internet_connectivityState extends State<internet_connectivity> {
             if(snapshot.hasData){
               return loading();
             }else{
-              return noInternet();
+              return connected('');
             }
         
 
@@ -78,4 +78,7 @@ Widget noInternet(){
     ],
   );
 }
+
+
+
 
