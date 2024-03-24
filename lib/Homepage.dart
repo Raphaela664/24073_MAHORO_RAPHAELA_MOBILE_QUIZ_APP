@@ -31,13 +31,13 @@ class _HomepageState extends State<Homepage> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
-  final List<Widget> _pages = [
-    QuizzesView(),
-    CalculatorView(),
-    ContactPage(),
-    AdminDashboard(),
-    MapPage()
-  ];
+   bool isAdmin() {
+
+    String adminEmail = 'test@gmail.com';
+    return user?.email == adminEmail;
+  }
+
+  late List<Widget> _pages;
 
   @override
   void initState() {
@@ -67,9 +67,15 @@ class _HomepageState extends State<Homepage> {
   void signerUserOut(){
     FirebaseAuth.instance.signOut();
   }
-
+ 
   @override
   Widget build(BuildContext context) {
+    _pages = [
+    if (isAdmin()) AdminDashboard() else QuizzesView(),
+    CalculatorView(),
+    ContactPage(),
+    MapPage()
+  ];
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -205,21 +211,6 @@ class _HomepageState extends State<Homepage> {
           ],
         ),
       ),
-      // body: StreamBuilder<ConnectivityResult>(
-      //   stream: Connectivity().onConnectivityChanged,
-      //   builder: (context, snapshot) {
-      //     if (snapshot.hasData) {
-      //       ConnectivityResult result = snapshot.data!;
-      //       if (result == ConnectivityResult.none) {
-      //         return internet_connectivity();
-      //       } else {
-      //         return _pages[_selectedIndex];
-      //       }
-      //     } else {
-      //       return CircularProgressIndicator();
-      //     }
-      //   },
-      // ),
       body: StreamBuilder<ConnectivityResult>(
         stream: Connectivity().onConnectivityChanged,
         builder: (context, snapshot) {
