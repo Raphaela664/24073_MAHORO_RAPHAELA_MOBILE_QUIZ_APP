@@ -21,6 +21,7 @@ class AdminDashboard extends StatelessWidget {
             },
             child: Text('Create Quiz'),
           ),
+          SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
               Navigator.push(
@@ -30,13 +31,7 @@ class AdminDashboard extends StatelessWidget {
             },
             child: Text('View Quiz List'),
           ),
-          SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              // Navigate to quiz results page
-            },
-            child: Text('View Quiz Results'),
-          ),
+          
         ],
       ),
     );
@@ -68,12 +63,6 @@ class QuizList extends StatelessWidget {
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconButton(
-                      icon: Icon(Icons.edit),
-                      onPressed: () {
-                        // Navigate to update quiz page
-                      },
-                    ),
                     IconButton(
                       icon: Icon(Icons.delete),
                       onPressed: () {

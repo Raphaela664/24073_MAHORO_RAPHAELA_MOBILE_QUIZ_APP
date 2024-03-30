@@ -10,7 +10,7 @@ class QuestionRepository extends GetxController {
   
   createQuestion(Question question) async {
     await _db.collection('questions').add(question.toJson()).whenComplete(() => Get.snackbar('Success', 'Question created successfully.',
-    snackPosition: SnackPosition.BOTTOM,
+    snackPosition: SnackPosition.TOP,
     backgroundColor: Colors.green.withOpacity(0.1),
     colorText: Colors.green),
 

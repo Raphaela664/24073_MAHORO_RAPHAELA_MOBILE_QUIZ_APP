@@ -1,7 +1,11 @@
 
+import 'package:firebase_messaging/firebase_messaging.dart';
+
 class FirebaseApi {
-  final _firebaseMessaging = FirebaseM.instance;
+  final _firebaseMessaging = FirebaseMessaging.instance;
   Future<void> initNofications() async {
-    await _firebaseMess
+    await _firebaseMessaging.requestPermission();
+    
+
   }
 }

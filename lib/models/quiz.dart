@@ -1,8 +1,7 @@
 import 'package:assignment_3/models/question.dart';
-import 'package:uuid/uuid.dart';
 
 class Quiz {
-  late final String id; // Change to non-nullable
+  String id; // Change to non-nullable
   final String title;
   final List<Question> questions;
 

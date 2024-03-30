@@ -2,15 +2,14 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:assignment_3/pages/AdminDashboardView.dart';
 import 'package:assignment_3/pages/ContactPage.dart';
-import 'package:assignment_3/pages/LocationView.dart';
 import 'package:assignment_3/pages/QuizzesView.dart';
 import 'package:assignment_3/provider/theme.dart';
+import 'package:assignment_3/services/map_utils.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:provider/provider.dart';
-import 'InternetConnectivity/internet_connectivity.dart';
 import 'pages/CalculatorView.dart';
 import 'package:image_picker/image_picker.dart';
 

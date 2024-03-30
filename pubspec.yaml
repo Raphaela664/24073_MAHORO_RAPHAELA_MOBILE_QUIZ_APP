@@ -55,9 +55,12 @@ dependencies:
   path_provider: ^2.0.2
   intl: ^0.19.0
   google_maps_flutter: ^2.5.3
-  geolocator: ^11.0.0
-  geocoder2: ^1.4.0
-  firebase_messaging: ^14.7.20
+  firebase_messaging: ^14.7.19
+  location: ^5.0.3
+  flutter_polyline_points: ^2.0.0
+  flutter_local_notifications: ^9.9.1
+  motion_toast: ^2.9.0
+  awesome_dialog: ^3.2.0
 
 dev_dependencies:
   flutter_test:
