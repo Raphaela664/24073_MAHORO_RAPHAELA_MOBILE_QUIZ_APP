@@ -1,4 +1,6 @@
 import 'package:assignment_3/database/database_service.dart';
+import 'package:assignment_3/services/push_notifications.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
@@ -8,6 +10,14 @@ import 'package:get/get.dart';
 import 'pages/authentication/auth_page.dart';
 import 'provider/theme.dart';
 
+
+
+Future _firebaseBackgroundMessage(RemoteMessage message) async{
+  if(message.notification!=null){
+    print('Some notification received');
+  }
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
@@ -16,8 +26,11 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   // await initNotifications();
-  // Initialize DatabaseHelper
+  PushNotifications.init();
+  FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundMessage);
+
   await DatabaseHelper.instance.database;
+  // showWelcomeNotification();
 
   // @override
   // void initState(){
@@ -88,7 +101,7 @@ class MyApp extends StatelessWidget {
 //     await flutterLocalNotificationsPlugin.show(
 //       0, // Notification ID
 //       'Welcome back!', // Notification title
-//       'We have more quiz for you today.', // Notification body
+//       'New Quizzes available', // Notification body
 //       platformChannelSpecifics,
 //       payload: 'quiz_notification', // Optional payload
 //     );

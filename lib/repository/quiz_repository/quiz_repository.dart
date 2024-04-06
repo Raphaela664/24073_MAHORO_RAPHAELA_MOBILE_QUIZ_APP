@@ -12,13 +12,15 @@ class QuizRepository {
   late final DatabaseHelper _databaseHelper;
 
   QuizRepository._privateConstructor() {
-//
+    _databaseHelper = DatabaseHelper.instance;
   }
     QuizRepository() {
-    //
+     _databaseHelper = DatabaseHelper.instance;
   }
 
   final _db = FirebaseFirestore.instance;
+
+  
 
   Future<void> createQuiz(BuildContext context, Quiz quiz) async {
     // Check connectivity status
@@ -129,13 +131,14 @@ class QuizRepository {
       }
 
     });
-    print(id);
+   
     
     return Quiz(
       id: id,
       title: title,
       questions: [], 
     );
+
     
   }).toList();
 
@@ -143,5 +146,114 @@ class QuizRepository {
   return quizzes;
 
 }
+
+Future<void> deleteQuiz(BuildContext context, String quizId) async {
+  var connectivityResult = await Connectivity().checkConnectivity();
+  
+  if (connectivityResult == ConnectivityResult.none) {
+    // Delete quiz from Firebase since there's no internet connectivity
+    await _deleteQuizFromLocalDatabase(context,quizId); 
+  } else {
+    // Delete quiz from local database
+    await _deleteQuizFromFirebase(context,quizId);
+  }
+}
+
+Future<void> _deleteQuizFromLocalDatabase(BuildContext context,String quizId) async {
+  final Database db = await _databaseHelper.database;
+  try {
+    // Delete quiz entry
+    await db.delete(
+      'quiz',
+      where: 'id = ?',
+      whereArgs: [quizId],
+    );
+    
+    // Delete associated questions
+    await db.delete(
+      'questions',
+      where: 'quizId = ?',
+      whereArgs: [quizId],
+    );
+
+    // Show success snackbar
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Quiz deleted from local database.'),
+        backgroundColor: Colors.green.withOpacity(0.1),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  } catch (e) {
+    // Show error snackbar
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error deleting quiz from local database. Please try again.'),
+        backgroundColor: Colors.red.withOpacity(0.1),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+}
+
+Future<void> _deleteQuizFromFirebase(BuildContext context,String quizId) async {
+  try {
+    print(quizId);
+    String id = quizId;
+    await FirebaseFirestore.instance.collection('quiz').doc(id).delete();
+    
+
+    // Show success snackbar
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Quiz deleted from Firebase.'),
+        backgroundColor: Colors.green.withOpacity(0.1),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  } catch (e) {
+    // Show error snackbar
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error deleting quiz from Firebase. Please try again.'),
+        backgroundColor: Colors.red.withOpacity(0.1),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+}
+Future<void> synchronizeDatabase(BuildContext context) async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+
+    if (connectivityResult == ConnectivityResult.none) {
+      // No internet connection
+      return;
+    }
+
+    // Get all quizzes from Firebase
+    QuerySnapshot quizSnapshot = await FirebaseFirestore.instance.collection('quiz').get();
+    List<Quiz> quizzesFromFirebase = quizSnapshot.docs.map((doc) {
+      // Corrected code to access document data
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      return Quiz.fromJson(data);
+    }).toList();
+
+    List<Quiz> quizzesFromSQLite = await getAllQuizzesFromSQLite();
+
+    // Synchronize quizzes
+    for (var quiz in quizzesFromFirebase) {
+      if (!quizzesFromSQLite.any((q) => q.id == quiz.id)) {
+        // Quiz doesn't exist in SQLite, so add it
+        await _saveQuizToLocalDatabase(context, quiz);
+      }
+    }
+
+    for (var quiz in quizzesFromSQLite) {
+      if (!quizzesFromFirebase.any((q) => q.id == quiz.id)) {
+        // Quiz doesn't exist in Firebase, so delete it
+        await _saveQuizToFirebase(context, quiz);
+      }
+    }
+  }
 
 }

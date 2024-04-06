@@ -51,24 +51,80 @@ class _QuizViewState extends State<QuizView> {
     });
   }
 
-  // Load questions from SQLite database
   Future<void> _loadQuestionsFromSQLite() async {
-    final Database db = await _databaseHelper.database;
+  print('Getting questions');
+  final Database db = await _databaseHelper.database;
+
+  // Query questions for the specific quiz from SQLite database
+  List<Map<String, dynamic>> questionMaps = await db.query(
+    'questions',
+    where: 'quizId = ?',
+    whereArgs: [widget.quizId],
+  );
+
+  // Convert question maps to Question objects
+  List<Question> questions = questionMaps.map((questionMap) {
+    return Question(
+      id: questionMap['id'],
+      quizId: questionMap['quizId'],
+      question_description: questionMap['question_description'],
+      options: (questionMap['options'] as String).split(','),
+      correctAnswerIndex: questionMap['correctAnswerIndex'],
+    );
+  }).toList();
+
+  print(questions);
+
+  setState(() {
+    _questions = questions;
+  });
+}
+
+
+  // Load questions from SQLite database
+//   Future<void> _loadQuestionsFromSQLite() async {
+//   print('Getting questions');
+//   final Database db = await _databaseHelper.database;
+
+//   // Query questions for the specific quiz from SQLite database
+//   List<Map<String, dynamic>> questionMaps = await db.query(
+//     'questions',
+//     where: 'quizId = ?',
+//     whereArgs: [widget.quizId],
+//   );
+
+//   // Convert question maps to Question objects
+//   List<Question> questions = questionMaps.map((questionMap) {
+//     return Question.fromJson(questionMap);
+//   }).toList();
+
+//   print(questions);
+
+//   setState(() {
+//     _questions = questions;
+//   });
+// }
+
+
+  // Future<void> _loadQuestionsFromSQLite() async {
+  //   print('Getting questions');
+  //   final Database db = await _databaseHelper.database;
   
 
-    // Query all questions from SQLite database
-    List<Map<String, dynamic>> questionMaps = await db.query('questions');
+  //   // Query all questions from SQLite database
+  //   List<Map<String, dynamic>> questionMaps = await db.query('questions');
 
-    // Convert question maps to Question objects
-    List<Question> questions = questionMaps.map((questionMap) {
-      print(questionMap);
-      return Question.fromJson(questionMap);
-    }).toList();
+  //   // Convert question maps to Question objects
+  //   List<Question> questions = questionMaps.map((questionMap) {
+  //     return Question.fromJson(questionMap);
+  //   }).toList();
+    
+  //   print(questions);
 
-    setState(() {
-      _questions = questions;
-    });
-  }
+  //   setState(() {
+  //     _questions = questions;
+  //   });
+  // }
 
   void _startQuiz() {
     setState(() {
