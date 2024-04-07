@@ -6,9 +6,9 @@ import 'package:assignment_3/models/question.dart';
 import 'package:sqflite/sqflite.dart'; // Import sqflite package
 
 class QuizView extends StatefulWidget {
-  final String quizId;
+  final String quiz_id;
 
-  const QuizView({Key? key, required this.quizId}) : super(key: key);
+  const QuizView({Key? key, required this.quiz_id}) : super(key: key);
 
   @override
   _QuizViewState createState() => _QuizViewState();
@@ -39,7 +39,7 @@ class _QuizViewState extends State<QuizView> {
     // If internet is available, load questions from Firebase
     QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('questions')
-        .where('quizId', isEqualTo: widget.quizId)
+        .where('quiz_id', isEqualTo: widget.quiz_id)
         .get();
 
     List<Question> questions = snapshot.docs.map((doc) {
@@ -58,18 +58,20 @@ class _QuizViewState extends State<QuizView> {
   // Query questions for the specific quiz from SQLite database
   List<Map<String, dynamic>> questionMaps = await db.query(
     'questions',
-    where: 'quizId = ?',
-    whereArgs: [widget.quizId],
+    where: 'quiz_id = ?',
+    whereArgs: [widget.quiz_id],
   );
 
   // Convert question maps to Question objects
   List<Question> questions = questionMaps.map((questionMap) {
     return Question(
       id: questionMap['id'],
-      quizId: questionMap['quizId'],
+      quiz_id: questionMap['quiz_id'],
       question_description: questionMap['question_description'],
-      options: (questionMap['options'] as String).split(','),
-      correctAnswerIndex: questionMap['correctAnswerIndex'],
+      option1: questionMap['option1'],
+      option2: questionMap['option2'],
+      option3: questionMap['option3'],
+      correct_answer_index: questionMap['correct_answer_index'],
     );
   }).toList();
 
@@ -81,50 +83,7 @@ class _QuizViewState extends State<QuizView> {
 }
 
 
-  // Load questions from SQLite database
-//   Future<void> _loadQuestionsFromSQLite() async {
-//   print('Getting questions');
-//   final Database db = await _databaseHelper.database;
 
-//   // Query questions for the specific quiz from SQLite database
-//   List<Map<String, dynamic>> questionMaps = await db.query(
-//     'questions',
-//     where: 'quizId = ?',
-//     whereArgs: [widget.quizId],
-//   );
-
-//   // Convert question maps to Question objects
-//   List<Question> questions = questionMaps.map((questionMap) {
-//     return Question.fromJson(questionMap);
-//   }).toList();
-
-//   print(questions);
-
-//   setState(() {
-//     _questions = questions;
-//   });
-// }
-
-
-  // Future<void> _loadQuestionsFromSQLite() async {
-  //   print('Getting questions');
-  //   final Database db = await _databaseHelper.database;
-  
-
-  //   // Query all questions from SQLite database
-  //   List<Map<String, dynamic>> questionMaps = await db.query('questions');
-
-  //   // Convert question maps to Question objects
-  //   List<Question> questions = questionMaps.map((questionMap) {
-  //     return Question.fromJson(questionMap);
-  //   }).toList();
-    
-  //   print(questions);
-
-  //   setState(() {
-  //     _questions = questions;
-  //   });
-  // }
 
   void _startQuiz() {
     setState(() {
@@ -152,7 +111,7 @@ class _QuizViewState extends State<QuizView> {
     int score = 0;
     for (int i = 0; i < _questions.length; i++) {
       if (_selectedAnswers.containsKey(i) &&
-          _selectedAnswers[i] == _questions[i].correctAnswerIndex) {
+          _selectedAnswers[i] == _questions[i].correct_answer_index) {
         score++;
       }
     }
@@ -233,21 +192,51 @@ class _QuizViewState extends State<QuizView> {
               style: TextStyle(fontSize: 20),
             ),
             SizedBox(height: 20),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: List.generate(currentQuestion.options.length, (index) {
-                return RadioListTile<int>(
-                  title: Text(currentQuestion.options[index]),
-                  value: index,
-                  groupValue: _selectedAnswers.containsKey(_currentQuestionIndex)
-                      ? _selectedAnswers[_currentQuestionIndex]
-                      : null,
-                  onChanged: (value) {
-                    _selectAnswer(value!);
-                  },
-                );
-              }),
-            ),
+            // Column(
+            //   crossAxisAlignment: CrossAxisAlignment.start,
+            //   children: List.generate(currentQuestion.options.length, (index) {
+            //     return RadioListTile<int>(
+            //       title: Text(currentQuestion.options[index]),
+            //       value: index,
+            //       groupValue: _selectedAnswers.containsKey(_currentQuestionIndex)
+            //           ? _selectedAnswers[_currentQuestionIndex]
+            //           : null,
+            //       onChanged: (value) {
+            //         _selectAnswer(value!);
+            //       },
+            //     );
+            //   }),
+            // ),
+            RadioListTile<int>(
+  title: Text(currentQuestion.option1),
+  value: 0,
+  groupValue: _selectedAnswers.containsKey(_currentQuestionIndex)
+      ? _selectedAnswers[_currentQuestionIndex]
+      : null,
+  onChanged: (value) {
+    _selectAnswer(value!);
+  },
+),
+RadioListTile<int>(
+  title: Text(currentQuestion.option2),
+  value: 1,
+  groupValue: _selectedAnswers.containsKey(_currentQuestionIndex)
+      ? _selectedAnswers[_currentQuestionIndex]
+      : null,
+  onChanged: (value) {
+    _selectAnswer(value!);
+  },
+),
+RadioListTile<int>(
+  title: Text(currentQuestion.option3),
+  value: 2,
+  groupValue: _selectedAnswers.containsKey(_currentQuestionIndex)
+      ? _selectedAnswers[_currentQuestionIndex]
+      : null,
+  onChanged: (value) {
+    _selectAnswer(value!);
+  },
+),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _selectedAnswers.containsKey(_currentQuestionIndex)

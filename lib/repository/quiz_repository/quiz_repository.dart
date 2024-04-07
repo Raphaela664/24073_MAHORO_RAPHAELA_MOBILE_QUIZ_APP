@@ -1,4 +1,5 @@
 import 'package:assignment_3/database/database_service.dart';
+import 'package:assignment_3/models/question.dart';
 import 'package:assignment_3/models/quiz.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -51,10 +52,12 @@ class QuizRepository {
           'questions',
           {
             'id': question.id,
-            'quizId': quiz.id,
+            'quiz_id': quiz.id,
             'question_description': question.question_description,
-            'options': question.options.join(','),
-            'correctAnswerIndex': question.correctAnswerIndex,
+            'option1': question.option1,
+            'option2': question.option2,
+            'option3': question.option3,
+            'correct_answer_index': question.correct_answer_index,
           },
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
@@ -115,36 +118,73 @@ class QuizRepository {
       ),
     );
   }
+
   Future<List<Quiz>> getAllQuizzesFromSQLite() async {
   final Database db = await _databaseHelper.database;
   final List<Map<String, dynamic>> quizzesData = await db.query('quiz');
-  final List<Quiz> quizzes = quizzesData.map((quizData) {
+
+  // Iterate through each quiz data and fetch questions for each quiz
+  final List<Quiz> quizzes = await Future.wait(quizzesData.map((quizData) async {
     String id = '';
     String title = '';
+    List<Question> questions = [];
+
+    // Extract quiz id and title
     quizData.forEach((key, value) {
       if (key == 'id') {
         id = value.toString();
-        print(id);
       } else if (key == 'title') {
         title = value.toString();
       }
-
     });
-   
-    
+
+    // Fetch questions for the current quiz
+    final List<Map<String, dynamic>> questionsData = await db.query('questions', where: 'quiz_id = ?', whereArgs: [id]);
+    questions = questionsData.map((questionData) {
+      return Question.fromJson(questionData);
+    }).toList();
+
     return Quiz(
       id: id,
       title: title,
-      questions: [], 
+      questions: questions,
     );
+  }).toList());
+
+  print('Fetching quizzes and questions locally');
+  return quizzes;
+}
+
+//   Future<List<Quiz>> getAllQuizzesFromSQLite() async {
+//   final Database db = await _databaseHelper.database;
+//   final List<Map<String, dynamic>> quizzesData = await db.query('quiz');
+//   final List<Quiz> quizzes = quizzesData.map((quizData) {
+//     String id = '';
+//     String title = '';
+//     quizData.forEach((key, value) {
+//       if (key == 'id') {
+//         id = value.toString();
+//         print(id);
+//       } else if (key == 'title') {
+//         title = value.toString();
+//       }
+
+//     });
+   
+    
+//     return Quiz(
+//       id: id,
+//       title: title,
+//       questions: [], 
+//     );
 
     
-  }).toList();
+//   }).toList();
 
-  print('Fetching locally');
-  return quizzes;
+//   print('Fetching locally');
+//   return quizzes;
 
-}
+// }
 
 Future<void> deleteQuiz(BuildContext context, String quizId) async {
   var connectivityResult = await Connectivity().checkConnectivity();
@@ -169,7 +209,7 @@ Future<void> _deleteQuizFromLocalDatabase(BuildContext context,String quizId) as
     // Delete associated questions
     await db.delete(
       'questions',
-      where: 'quizId = ?',
+      where: 'quiz_id = ?',
       whereArgs: [quizId],
     );
 
@@ -192,33 +232,6 @@ Future<void> _deleteQuizFromLocalDatabase(BuildContext context,String quizId) as
     );
   }
 }
-
-// Future<void> _deleteQuizFromFirebase(BuildContext context,String quizId) async {
-//   try {
-//     print(quizId);
-//     String id = quizId;
-//     await FirebaseFirestore.instance.collection('quiz').doc(id).delete();
-    
-
-//     // Show success snackbar
-//     ScaffoldMessenger.of(context).showSnackBar(
-//       SnackBar(
-//         content: Text('Quiz deleted from Firebase.'),
-//         backgroundColor: Colors.green.withOpacity(0.1),
-//         duration: Duration(seconds: 2),
-//       ),
-//     );
-//   } catch (e) {
-//     // Show error snackbar
-//     ScaffoldMessenger.of(context).showSnackBar(
-//       SnackBar(
-//         content: Text('Error deleting quiz from Firebase. Please try again.'),
-//         backgroundColor: Colors.red.withOpacity(0.1),
-//         duration: Duration(seconds: 2),
-//       ),
-//     );
-//   }
-// }
 
 Future<void> _deleteQuizFromFirebase(BuildContext context, String quizId) async {
   try {

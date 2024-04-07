@@ -26,7 +26,7 @@ class QuizController extends GetxController {
 
       // Set quizId for each question
       quiz.questions.forEach((question) {
-        question.quizId = quizId;
+        question.quiz_id = quizId;
       });
       quiz.id = quizId;
 

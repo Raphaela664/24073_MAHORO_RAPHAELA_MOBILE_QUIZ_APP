@@ -1,5 +1,6 @@
 import 'package:assignment_3/models/quiz.dart';
 import 'package:assignment_3/pages/QuizCreationView.dart';
+import 'package:assignment_3/pages/SingleQuizView.dart';
 import 'package:assignment_3/repository/quiz_repository/quiz_repository.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
@@ -89,6 +90,15 @@ class _QuizListState extends State<QuizList> {
                 final quiz = quizzes[index];
                 return ListTile(
                   title: Text(quiz.title),
+                  onTap: () {
+                    // Navigate to SingleQuizView when a quiz is clicked
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SingleQuizView(quiz: quiz),
+                      ),
+                    );
+                  },
                   trailing: IconButton(
                     icon: Icon(Icons.delete),
                     onPressed: () {

@@ -60,8 +60,10 @@ class _QuizCreationViewState extends State<QuizCreationView> {
     setState(() {
       _questions.add(Question(
         question_description: '',
-        options: ['', '', ''],
-        correctAnswerIndex: 0,
+        option1:'',
+        option2:'',
+        option3:'',
+        correct_answer_index: 0,
       ));
     });
   }
@@ -85,42 +87,42 @@ class _QuizCreationViewState extends State<QuizCreationView> {
             ),
             SizedBox(height: 10),
             _buildOptionTextField(
-              question.options[0],
+              question.option1,
               'Option A',
               (newValue) {
                 setState(() {
-                  question.options[0] = newValue;
+                  question.option1 = newValue;
                 });
               },
             ),
             _buildOptionTextField(
-              question.options[1],
+              question.option2,
               'Option B',
               (newValue) {
                 setState(() {
-                  question.options[1] = newValue;
+                  question.option2 = newValue;
                 });
               },
             ),
             _buildOptionTextField(
-              question.options[2],
+              question.option3,
               'Option C',
               (newValue) {
                 setState(() {
-                  question.options[2] = newValue;
+                  question.option3 = newValue;
                 });
               },
             ),
             SizedBox(height: 10),
             DropdownButtonFormField(
-              value: question.correctAnswerIndex.toString(),
+              value: question.correct_answer_index.toString(),
               onChanged: (value) {
                 setState(() {
-                  question.correctAnswerIndex = int.parse(value!);
+                  question.correct_answer_index = int.parse(value!);
                 });
               },
               items: List.generate(
-                question.options.length,
+                3,
                 (index) => DropdownMenuItem(
                   value: index.toString(),
                   child: Text('Option ${String.fromCharCode(65 + index)}'),

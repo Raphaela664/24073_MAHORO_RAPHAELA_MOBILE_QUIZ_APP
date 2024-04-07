@@ -14,11 +14,11 @@ class DatabaseHelper {
   }
   Future<Database> _initDatabase() async {
   try {
-    final path = join(await getDatabasesPath(), 'quiz_db.db');
+    final path = join(await getDatabasesPath(), 'quizzes_db.db');
     final db = await openDatabase(
       path,
       onCreate: _onCreate,
-      version: 1,
+      version: 2,
     );
     return db;
   } catch (e) {
@@ -33,14 +33,9 @@ class DatabaseHelper {
         'CREATE TABLE quiz(id TEXT PRIMARY KEY, title TEXT)',
       );
       await db.execute(
-        'CREATE TABLE questions(id TEXT PRIMARY KEY, quizId TEXT, question_description TEXT, correctAnswerIndex INTEGER)',
+        'CREATE TABLE questions(id TEXT PRIMARY KEY, quiz_id TEXT, question_description TEXT, option1 TEXT, option2 TEXT, option3 TEXT,  correct_answer_index INTEGER)',
       );
-      await db.execute(
-        'CREATE TABLE options(id INTEGER PRIMARY KEY, questionId TEXT, option TEXT)',
-      );
-      await db.execute(
-        'CREATE TABLE quiz_questions_options(quizId TEXT, questionId TEXT, optionId INTEGER, FOREIGN KEY(quizId) REFERENCES quizzes(id), FOREIGN KEY(questionId) REFERENCES questions(id), FOREIGN KEY(optionId) REFERENCES options(id))',
-      );
+     
        print('print tables successfully created');
     } catch (e) {
       print('Error creating tables: $e');

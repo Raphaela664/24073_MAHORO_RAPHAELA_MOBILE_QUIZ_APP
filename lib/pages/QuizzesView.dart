@@ -101,13 +101,13 @@ class QuizzesView extends StatelessWidget {
     );
   }
 
-  Widget _buildQuizCard(BuildContext context, String quizTitle, String quizId) {
+  Widget _buildQuizCard(BuildContext context, String quizTitle, String quiz_id) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => QuizView(quizId: quizId),
+            builder: (context) => QuizView(quiz_id: quiz_id),
           ),
         );
       },
