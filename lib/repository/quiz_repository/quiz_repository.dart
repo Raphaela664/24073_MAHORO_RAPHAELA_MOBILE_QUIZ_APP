@@ -26,13 +26,12 @@ class QuizRepository {
     // Check connectivity status
     var connectivityResult = await Connectivity().checkConnectivity();
 
-    if (connectivityResult == ConnectivityResult.none) {
-      // If no internet connection, save to SQLite
-      await _saveQuizToLocalDatabase(context, quiz);
-    } else {
+    if (connectivityResult != ConnectivityResult.none) {
       // If internet connection is available, save to Firebase
       await _saveQuizToFirebase(context, quiz);
     }
+      await _saveQuizToLocalDatabase(context, quiz);
+
   }
 
   Future<void> _saveQuizToLocalDatabase(BuildContext context, Quiz quiz) async {
@@ -150,13 +149,11 @@ class QuizRepository {
 Future<void> deleteQuiz(BuildContext context, String quizId) async {
   var connectivityResult = await Connectivity().checkConnectivity();
   
-  if (connectivityResult == ConnectivityResult.none) {
-    // Delete quiz from Firebase since there's no internet connectivity
-    await _deleteQuizFromLocalDatabase(context,quizId); 
-  } else {
+  if (connectivityResult != ConnectivityResult.none) {
     // Delete quiz from local database
     await _deleteQuizFromFirebase(context,quizId);
   }
+  await _deleteQuizFromLocalDatabase(context,quizId); 
 }
 
 Future<void> _deleteQuizFromLocalDatabase(BuildContext context,String quizId) async {
@@ -196,23 +193,63 @@ Future<void> _deleteQuizFromLocalDatabase(BuildContext context,String quizId) as
   }
 }
 
-Future<void> _deleteQuizFromFirebase(BuildContext context,String quizId) async {
-  try {
-    print(quizId);
-    String id = quizId;
-    await FirebaseFirestore.instance.collection('quiz').doc(id).delete();
+// Future<void> _deleteQuizFromFirebase(BuildContext context,String quizId) async {
+//   try {
+//     print(quizId);
+//     String id = quizId;
+//     await FirebaseFirestore.instance.collection('quiz').doc(id).delete();
     
 
-    // Show success snackbar
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Quiz deleted from Firebase.'),
-        backgroundColor: Colors.green.withOpacity(0.1),
-        duration: Duration(seconds: 2),
-      ),
-    );
+//     // Show success snackbar
+//     ScaffoldMessenger.of(context).showSnackBar(
+//       SnackBar(
+//         content: Text('Quiz deleted from Firebase.'),
+//         backgroundColor: Colors.green.withOpacity(0.1),
+//         duration: Duration(seconds: 2),
+//       ),
+//     );
+//   } catch (e) {
+//     // Show error snackbar
+//     ScaffoldMessenger.of(context).showSnackBar(
+//       SnackBar(
+//         content: Text('Error deleting quiz from Firebase. Please try again.'),
+//         backgroundColor: Colors.red.withOpacity(0.1),
+//         duration: Duration(seconds: 2),
+//       ),
+//     );
+//   }
+// }
+
+Future<void> _deleteQuizFromFirebase(BuildContext context, String quizId) async {
+  try {
+    // Query the Firestore collection to find the document with the matching id field
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('quiz').where('id', isEqualTo: quizId).get();
+
+    // Check if any documents match the query
+    if (querySnapshot.docs.isNotEmpty) {
+      // If a document is found, delete it
+      await querySnapshot.docs.first.reference.delete();
+
+      // Show success snackbar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Quiz deleted from Firebase.'),
+          backgroundColor: Colors.green.withOpacity(0.1),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } else {
+      // Show error snackbar if no matching document is found
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Quiz with ID $quizId not found in Firebase.'),
+          backgroundColor: Colors.red.withOpacity(0.1),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   } catch (e) {
-    // Show error snackbar
+    // Show error snackbar if an exception occurs
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Error deleting quiz from Firebase. Please try again.'),
@@ -222,6 +259,7 @@ Future<void> _deleteQuizFromFirebase(BuildContext context,String quizId) async {
     );
   }
 }
+
 Future<void> synchronizeDatabase(BuildContext context) async {
     var connectivityResult = await Connectivity().checkConnectivity();
 
@@ -243,14 +281,14 @@ Future<void> synchronizeDatabase(BuildContext context) async {
     // Synchronize quizzes
     for (var quiz in quizzesFromFirebase) {
       if (!quizzesFromSQLite.any((q) => q.id == quiz.id)) {
-        // Quiz doesn't exist in SQLite, so add it
-        await _saveQuizToLocalDatabase(context, quiz);
+        // Quiz doesn't exist in SQLite, so delete it from firebase
+        await _deleteQuizFromFirebase(context, quiz.id);
       }
     }
 
     for (var quiz in quizzesFromSQLite) {
       if (!quizzesFromFirebase.any((q) => q.id == quiz.id)) {
-        // Quiz doesn't exist in Firebase, so delete it
+        // Quiz exist locally but not in firebase, so add it to firebase
         await _saveQuizToFirebase(context, quiz);
       }
     }
