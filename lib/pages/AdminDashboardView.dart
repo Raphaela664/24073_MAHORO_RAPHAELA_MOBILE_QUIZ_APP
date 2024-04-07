@@ -41,48 +41,6 @@ class AdminDashboard extends StatelessWidget {
   }
 }
 
-// class QuizList extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('quiz List'),
-//       ),
-//       body: StreamBuilder<QuerySnapshot>(
-//         stream: FirebaseFirestore.instance.collection('quiz').snapshots(),
-//         builder: (context, snapshot) {
-//           if (!snapshot.hasData) {
-//             return Center(
-//               child: CircularProgressIndicator(),
-//             );
-//           }
-//           final quizzes = snapshot.data!.docs;
-//           return ListView.builder(
-//             itemCount: quizzes.length,
-//             itemBuilder: (context, index) {
-//               final quiz = quizzes[index];
-//               return ListTile(
-//                 title: Text(quiz['title']),
-//                 trailing: Row(
-//                   mainAxisSize: MainAxisSize.min,
-//                   children: [
-//                     IconButton(
-//                       icon: Icon(Icons.delete),
-//                       onPressed: () {
-//                         FirebaseFirestore.instance.collection('quiz').doc(quiz.id).delete();
-//                       },
-//                     ),
-//                   ],
-//                 ),
-//               );
-//             },
-//           );
-//         },
-//       ),
-//     );
-//   }
-// }
-
 class QuizList extends StatefulWidget {
   @override
   _QuizListState createState() => _QuizListState();
@@ -135,7 +93,7 @@ class _QuizListState extends State<QuizList> {
                     icon: Icon(Icons.delete),
                     onPressed: () {
                        
-                       _deleteQuiz(context,quiz.id);
+                       _deleteQuiz(context,quiz);
                     },
                   ),
                 );
@@ -147,9 +105,43 @@ class _QuizListState extends State<QuizList> {
     );
   }
 
-  Future<void> _deleteQuiz(BuildContext context, quizId) async {
+  // Future<void> _deleteQuiz(BuildContext context, quizId) async {
+  //   // Delete quiz from both local database and Firebase
+  //   await quizRepository.deleteQuiz(context,quizId);
+  //   _fetchQuizzes(); // Refresh quiz list
+  // }
+  Future<void> _deleteQuiz(BuildContext context, Quiz quiz) async {
+  // Show a dialog to confirm deletion
+  bool confirmDeletion = await showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text("Confirm Deletion"),
+        content: Text("Are you sure you want to delete this quiz?"),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false); // Return false when cancel button is pressed
+            },
+            child: Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(true); // Return true when delete button is pressed
+            },
+            child: Text("Delete"),
+          ),
+        ],
+      );
+    },
+  );
+
+  // If user confirms deletion, proceed with deletion
+  if (confirmDeletion) {
     // Delete quiz from both local database and Firebase
-    await quizRepository.deleteQuiz(context,quizId);
+    await quizRepository.deleteQuiz(context, quiz.id);
     _fetchQuizzes(); // Refresh quiz list
   }
+}
+
 }
