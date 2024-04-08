@@ -93,7 +93,7 @@ class QuizzesView extends StatelessWidget {
             itemCount: snapshot.data!.length,
             itemBuilder: (context, index) {
               Quiz quiz = snapshot.data![index];
-              return _buildQuizCard(context, quiz.title, quiz.id!);
+              return _buildQuizCard(context, quiz.title, quiz.id);
             },
           );
         }

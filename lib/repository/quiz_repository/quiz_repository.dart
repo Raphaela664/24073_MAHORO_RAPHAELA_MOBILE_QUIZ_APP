@@ -95,11 +95,6 @@ class QuizRepository {
     },
     ).show();
 
-      
-      //  Get.snackbar('Success', 'Quiz created successfully.',
-      //     snackPosition: SnackPosition.BOTTOM,
-      //     backgroundColor: Colors.green.withOpacity(0.1),
-      //     colorText: Colors.green);
 
     }).catchError((error, stackTrace) {
       Get.snackbar('Error', 'Something went wrong. Try again',
@@ -155,36 +150,6 @@ class QuizRepository {
   return quizzes;
 }
 
-//   Future<List<Quiz>> getAllQuizzesFromSQLite() async {
-//   final Database db = await _databaseHelper.database;
-//   final List<Map<String, dynamic>> quizzesData = await db.query('quiz');
-//   final List<Quiz> quizzes = quizzesData.map((quizData) {
-//     String id = '';
-//     String title = '';
-//     quizData.forEach((key, value) {
-//       if (key == 'id') {
-//         id = value.toString();
-//         print(id);
-//       } else if (key == 'title') {
-//         title = value.toString();
-//       }
-
-//     });
-   
-    
-//     return Quiz(
-//       id: id,
-//       title: title,
-//       questions: [], 
-//     );
-
-    
-//   }).toList();
-
-//   print('Fetching locally');
-//   return quizzes;
-
-// }
 
 Future<void> deleteQuiz(BuildContext context, String quizId) async {
   var connectivityResult = await Connectivity().checkConnectivity();
@@ -306,5 +271,94 @@ Future<void> synchronizeDatabase(BuildContext context) async {
       }
     }
   }
+
+  Future<void> _updateQuizQuestionsLocally(String quizId, Question updatedQuestion) async {
+  final Database db = await _databaseHelper.database;
+  try {
+    await db.transaction((txn) async {
+      // Delete existing questions for the given quiz ID
+      await txn.delete('questions', where: 'quiz_id = ?', whereArgs: [quizId]);
+
+      // Insert updated questions
+      
+        await txn.insert('questions', {
+          'id': updatedQuestion.id,
+          'quiz_id': quizId,
+          'question_description': updatedQuestion.question_description,
+          'option1': updatedQuestion.option1,
+          'option2': updatedQuestion.option2,
+          'option3': updatedQuestion.option3,
+          'correct_answer_index': updatedQuestion.correct_answer_index,
+        });
+      
+    });
+  } catch (e) {
+    // Handle any errors
+    print('Error updating questions locally: $e');
+    rethrow; // Rethrow the exception for the calling method to handle
+  }
+}
+
+Future<void> _updateQuizQuestionsInFirebase(String quizId, Question updatedQuestion) async {
+  try {
+        QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('quiz').where('id', isEqualTo: quizId).get();
+    
+
+    if (querySnapshot.docs.isNotEmpty) {
+      DocumentSnapshot quizSnapshot = querySnapshot.docs.first;
+      // Convert the document data to a Map
+      Map<String, dynamic>? quizData = quizSnapshot.data() as Map<String, dynamic>?;
+
+      if (quizData != null) {
+        List<dynamic> questions = quizData['questions'] ?? [];
+
+        // Find the index of the updated question in the questions array
+        int index = questions.indexWhere((question) => question['id'] == updatedQuestion.id);
+
+        // Update the question at the found index with the updated question data
+        if (index != -1) {
+          questions[index] = updatedQuestion.toJson();
+
+          // Update the questions array in the quiz document
+          await quizSnapshot.reference.update({'questions': questions});
+
+          print('Question updated in Firebase');
+        } else {
+          print('Question with ID ${updatedQuestion.id} not found in the quiz $quizId');
+        }
+      }
+    } else {
+      print('Quiz with ID $quizId not found in Firebase');
+    }
+  } catch (e) {
+    // Handle any errors
+    print('Error updating question in Firebase: $e');
+    rethrow; // Rethrow the exception for the calling method to handle
+  }
+}
+
+
+
+Future<void> updateQuizQuestions(BuildContext context, String quizId, Question updatedQuestions) async {
+  var connectivityResult = await Connectivity().checkConnectivity();
+  
+  if (connectivityResult != ConnectivityResult.none) {
+    // No internet connection, update locally only
+    await _updateQuizQuestionsInFirebase(quizId, updatedQuestions); 
+    return;
+  }
+    await _updateQuizQuestionsLocally( quizId, updatedQuestions);
+
+  AwesomeDialog(
+    context: context,
+    dialogType: DialogType.success, 
+    animType: AnimType.scale,
+    title: 'Success',
+    desc: 'Quiz Updated successfully!',
+    btnOkOnPress: () {
+    },
+    ).show();
+}
+
 
 }
