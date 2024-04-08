@@ -277,7 +277,7 @@ Future<void> synchronizeDatabase(BuildContext context) async {
   try {
     await db.transaction((txn) async {
       // Delete existing questions for the given quiz ID
-      await txn.delete('questions', where: 'quiz_id = ?', whereArgs: [quizId]);
+      await txn.delete('questions', where: 'id = ?', whereArgs: [updatedQuestion.id]);
 
       // Insert updated questions
       
@@ -292,6 +292,7 @@ Future<void> synchronizeDatabase(BuildContext context) async {
         });
       
     });
+    print('Question updated locally');
   } catch (e) {
     // Handle any errors
     print('Error updating questions locally: $e');
@@ -343,9 +344,7 @@ Future<void> updateQuizQuestions(BuildContext context, String quizId, Question u
   var connectivityResult = await Connectivity().checkConnectivity();
   
   if (connectivityResult != ConnectivityResult.none) {
-    // No internet connection, update locally only
     await _updateQuizQuestionsInFirebase(quizId, updatedQuestions); 
-    return;
   }
     await _updateQuizQuestionsLocally( quizId, updatedQuestions);
 
@@ -359,6 +358,111 @@ Future<void> updateQuizQuestions(BuildContext context, String quizId, Question u
     },
     ).show();
 }
+
+Future<void> createQuestion(BuildContext context, Question question) async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+
+    if (connectivityResult != ConnectivityResult.none) {
+      await _saveQuestionToFirebase(context, question);
+    }
+
+    await _saveQuestionToLocalDatabase(context, question);
+  }
+
+  Future<void> _saveQuestionToLocalDatabase(BuildContext context, Question question) async {
+    final Database db = await _databaseHelper.database;
+    try {
+      await db.insert(
+        'questions',
+        {
+          'id': question.id,
+          'quiz_id': question.quiz_id,
+          'question_description': question.question_description,
+          'option1': question.option1,
+          'option2': question.option2,
+          'option3': question.option3,
+          'correct_answer_index': question.correct_answer_index,
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Question saved to local database.'),
+          backgroundColor: Colors.green.withOpacity(0.1),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error saving question to local database. Please try again.'),
+          backgroundColor: Colors.red.withOpacity(0.1),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+  
+Future<void> _saveQuestionToFirebase(BuildContext context, Question question) async {
+  try {
+    // Retrieve the quiz document that matches the provided quizId
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('quiz').where('id', isEqualTo: question.quiz_id).get();
+    
+    if (querySnapshot.docs.isNotEmpty) {
+      DocumentSnapshot quizSnapshot = querySnapshot.docs.first;
+      // Convert the document data to a Map
+      Map<String, dynamic>? quizData = quizSnapshot.data() as Map<String, dynamic>?;
+
+      if (quizData != null) {
+        List<dynamic> questions = quizData['questions'] ?? [];
+
+        // Add the newly created question to the questions array
+        await _db.collection('questions').add(question.toJson());
+        questions.add(question.toJson());
+
+        // Update the questions array in the quiz document
+        
+        await quizSnapshot.reference.update({'questions': questions});
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Question saved to Firebase and linked with the quiz.'),
+            backgroundColor: Colors.green.withOpacity(0.1),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to add question: Quiz data not found.'),
+            backgroundColor: Colors.red.withOpacity(0.1),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to add question: Quiz not found.'),
+          backgroundColor: Colors.red.withOpacity(0.1),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  } catch (e) {
+    print(e);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error saving question to Firebase. Please try again.'),
+        backgroundColor: Colors.red.withOpacity(0.1),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+}
+
+
 
 
 }

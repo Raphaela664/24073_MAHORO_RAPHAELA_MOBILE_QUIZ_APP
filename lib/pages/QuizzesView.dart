@@ -107,7 +107,7 @@ class QuizzesView extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => QuizView(quiz_id: quiz_id),
+            builder: (context) => QuizView(quiz_id: quiz_id, quiz_title:quizTitle),
           ),
         );
       },

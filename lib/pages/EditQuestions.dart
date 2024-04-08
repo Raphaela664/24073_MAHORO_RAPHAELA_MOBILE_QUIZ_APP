@@ -17,6 +17,7 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
   final TextEditingController _option2Controller = TextEditingController();
   final TextEditingController _option3Controller = TextEditingController();
   late int _correctAnswerIndex=0;
+  final QuizRepository quizRepository = QuizRepository.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +92,7 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
     );
   }
 
-  void _saveQuestion() {
+  Future<void> _saveQuestion() async {
     // Create a new Question object with the entered details
     final newQuestion = Question(
       id: '', 
@@ -102,7 +103,7 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
       option3: _option3Controller.text,
       correct_answer_index: _correctAnswerIndex,
     );
-
+    await QuizRepository.instance.createQuestion(context, newQuestion);
     // Pass the new question back to the previous screen
     Navigator.pop(context, newQuestion);
   }

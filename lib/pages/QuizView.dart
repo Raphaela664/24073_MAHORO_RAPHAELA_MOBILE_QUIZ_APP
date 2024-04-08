@@ -1,14 +1,19 @@
 import 'package:assignment_3/database/database_service.dart';
+import 'package:assignment_3/models/results.dart';
+import 'package:assignment_3/repository/results_repo.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:assignment_3/models/question.dart';
-import 'package:sqflite/sqflite.dart'; // Import sqflite package
+import 'package:sqflite/sqflite.dart';
+import 'package:uuid/uuid.dart'; // Import sqflite package
 
 class QuizView extends StatefulWidget {
   final String quiz_id;
+  final String quiz_title;
 
-  const QuizView({Key? key, required this.quiz_id}) : super(key: key);
+  const QuizView({Key? key, required this.quiz_id, required this.quiz_title}) : super(key: key);
 
   @override
   _QuizViewState createState() => _QuizViewState();
@@ -20,6 +25,7 @@ class _QuizViewState extends State<QuizView> {
   int _currentQuestionIndex = 0;
   Map<int, int> _selectedAnswers = {};
   bool _quizStarted = false;
+  final ResultRepo _resultRepo = ResultRepo();
 
   @override
   void initState() {
@@ -115,6 +121,21 @@ class _QuizViewState extends State<QuizView> {
         score++;
       }
     }
+    User? user = FirebaseAuth.instance.currentUser;
+  String? userEmail = user?.email ?? 'Unknown';
+
+  // Generate UUID for the result ID
+  String resultId = Uuid().v4();
+    Results results = Results(
+    id: resultId, // Provide a unique ID for the result
+    student_email: userEmail, // Provide student email
+    quiz_id: widget.quiz_id,
+    quiz_title: widget.quiz_title, // Provide the quiz title
+    score: '$score / ${_questions.length}',
+    );
+
+  // Call saveResults method from ResultRepo
+  _resultRepo.saveResults(results);
 
     showDialog(
       context: context,
@@ -192,21 +213,7 @@ class _QuizViewState extends State<QuizView> {
               style: TextStyle(fontSize: 20),
             ),
             SizedBox(height: 20),
-            // Column(
-            //   crossAxisAlignment: CrossAxisAlignment.start,
-            //   children: List.generate(currentQuestion.options.length, (index) {
-            //     return RadioListTile<int>(
-            //       title: Text(currentQuestion.options[index]),
-            //       value: index,
-            //       groupValue: _selectedAnswers.containsKey(_currentQuestionIndex)
-            //           ? _selectedAnswers[_currentQuestionIndex]
-            //           : null,
-            //       onChanged: (value) {
-            //         _selectAnswer(value!);
-            //       },
-            //     );
-            //   }),
-            // ),
+          
             RadioListTile<int>(
   title: Text(currentQuestion.option1),
   value: 0,
