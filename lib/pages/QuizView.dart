@@ -1,5 +1,6 @@
 import 'package:assignment_3/database/database_service.dart';
 import 'package:assignment_3/models/results.dart';
+import 'package:assignment_3/pages/QuizzesView.dart';
 import 'package:assignment_3/repository/results_repo.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -145,7 +146,10 @@ class _QuizViewState extends State<QuizView> {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.pop(context);
+               Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => QuizzesView()),
+              );
             },
             child: Text('Close'),
           ),

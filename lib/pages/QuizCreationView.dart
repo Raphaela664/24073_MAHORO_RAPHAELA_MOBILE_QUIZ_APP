@@ -142,15 +142,32 @@ class _QuizCreationViewState extends State<QuizCreationView> {
       onChanged: onChanged,
     );
   }
+  void _saveQuiz() async{
+  String quizTitle = _quizTitleController.text;
+  Quiz quiz = Quiz(
+    id:'',
+    title: quizTitle,
+    questions: _questions,
+  );
+  await _quizController.saveQuizWithQuestions(context, quiz);
+ // await Future.delayed(Duration(seconds: 2));
 
-  void _saveQuiz() {
-    String quizTitle = _quizTitleController.text;
-    Quiz quiz = Quiz(
-      id:'',
-      title: quizTitle,
-      questions: _questions,
-    );
-    _quizController.saveQuizWithQuestions(context,quiz);
-  }
+  // Clear fields after saving the quiz
+  setState(() {
+    _questions.clear();
+    _quizTitleController.clear();
+  });
+}
+
+
+  // void _saveQuiz() {
+  //   String quizTitle = _quizTitleController.text;
+  //   Quiz quiz = Quiz(
+  //     id:'',
+  //     title: quizTitle,
+  //     questions: _questions,
+  //   );
+  //   _quizController.saveQuizWithQuestions(context,quiz);
+  // }
 }
 

@@ -20,6 +20,7 @@ class QuizRepository {
   }
 
   final _db = FirebaseFirestore.instance;
+  bool _syncing = false;
 
   
 
@@ -85,16 +86,8 @@ class QuizRepository {
 
   Future<void> _saveQuizToFirebase(BuildContext context, Quiz quiz) async {
     await _db.collection('quiz').add(quiz.toJson()).then((_) {
-      AwesomeDialog(
-    context: context,
-    dialogType: DialogType.success, // Choose the dialog type.
-    animType: AnimType.scale, // Choose an entrance animation.
-    title: 'Success',
-    desc: 'Quiz created successfully!',
-    btnOkOnPress: () {
-    },
-    ).show();
-
+      
+//
 
     }).catchError((error, stackTrace) {
       Get.snackbar('Error', 'Something went wrong. Try again',
@@ -103,15 +96,25 @@ class QuizRepository {
           colorText: Colors.red);
       print(error.toString());
     });
-
+    if(!_syncing){
     // Show success snackbar
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Quiz saved to Firebase.'),
-        backgroundColor: Colors.green.withOpacity(0.1),
-        duration: Duration(seconds: 2),
-      ),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(
+    //     content: Text('Quiz saved to Firebase.'),
+    //     backgroundColor: Colors.green.withOpacity(0.1),
+    //     duration: Duration(seconds: 2),
+    //   ),
+    // );
+    AwesomeDialog(
+    context: context,
+    dialogType: DialogType.success, // Choose the dialog type.
+    animType: AnimType.scale, // Choose an entrance animation.
+    title: 'Success',
+    desc: 'Quiz created successfully!',
+    btnOkOnPress: () {
+    },
+    ).show();
+    }
   }
 
   Future<List<Quiz>> getAllQuizzesFromSQLite() async {
@@ -177,7 +180,7 @@ Future<void> _deleteQuizFromLocalDatabase(BuildContext context,String quizId) as
       where: 'quiz_id = ?',
       whereArgs: [quizId],
     );
-
+    if(!_syncing){
     // Show success snackbar
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -186,6 +189,7 @@ Future<void> _deleteQuizFromLocalDatabase(BuildContext context,String quizId) as
         duration: Duration(seconds: 2),
       ),
     );
+    }
   } catch (e) {
     // Show error snackbar
     ScaffoldMessenger.of(context).showSnackBar(
@@ -207,15 +211,17 @@ Future<void> _deleteQuizFromFirebase(BuildContext context, String quizId) async 
     if (querySnapshot.docs.isNotEmpty) {
       // If a document is found, delete it
       await querySnapshot.docs.first.reference.delete();
-
-      // Show success snackbar
-      ScaffoldMessenger.of(context).showSnackBar(
+      if(!_syncing){
+         ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Quiz deleted from Firebase.'),
           backgroundColor: Colors.green.withOpacity(0.1),
           duration: Duration(seconds: 2),
         ),
       );
+      }
+      // Show success snackbar
+     
     } else {
       // Show error snackbar if no matching document is found
       ScaffoldMessenger.of(context).showSnackBar(
@@ -239,6 +245,7 @@ Future<void> _deleteQuizFromFirebase(BuildContext context, String quizId) async 
 }
 
 Future<void> synchronizeDatabase(BuildContext context) async {
+    _syncing = true;
     var connectivityResult = await Connectivity().checkConnectivity();
 
     if (connectivityResult == ConnectivityResult.none) {
@@ -270,6 +277,7 @@ Future<void> synchronizeDatabase(BuildContext context) async {
         await _saveQuizToFirebase(context, quiz);
       }
     }
+    _syncing=false;
   }
 
   Future<void> _updateQuizQuestionsLocally(String quizId, Question updatedQuestion) async {
@@ -385,14 +393,18 @@ Future<void> createQuestion(BuildContext context, Question question) async {
         },
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Question saved to local database.'),
-          backgroundColor: Colors.green.withOpacity(0.1),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      if(!_syncing){
+        AwesomeDialog(
+    context: context,
+    dialogType: DialogType.success, // Choose the dialog type.
+    animType: AnimType.scale, // Choose an entrance animation.
+    title: 'Success',
+    desc: 'Quiz created successfully!',
+    btnOkOnPress: () {
+    },
+    ).show();
+      }
+      
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

@@ -41,13 +41,6 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Your Location', // Add this line to set the title
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Theme.of(context).primaryColor,
-        iconTheme: IconThemeData(color: Colors.white),
-      ),
       body: _currentP == null
           ? const Center(
               child: Text("Loading..."),

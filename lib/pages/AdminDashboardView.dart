@@ -7,51 +7,103 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+// class AdminDashboard extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       body: ListView(
+//         padding: EdgeInsets.all(20),
+//         children: [
+//           ElevatedButton(
+//             onPressed: () {
+//               Navigator.push(
+//                 context,
+//                 MaterialPageRoute(builder: (context) => QuizCreationView()),
+//               );
+//             },
+//             child: Text('Create Quiz'),
+//           ),
+//           SizedBox(height: 20),
+//           ElevatedButton(
+//             onPressed: () {
+//               Navigator.push(
+//                 context,
+//                 MaterialPageRoute(builder: (context) => QuizList()),
+//               );
+//             },
+//             child: Text('View Quiz List'),
+//           ),
+//           SizedBox(height: 20),
+//           ElevatedButton(
+//             onPressed: () {
+//               Navigator.push(
+//                 context,
+//                 MaterialPageRoute(builder: (context) => ResultsPage()),
+//               );
+//             },
+//             child: Text('View Results'),
+//           ),
+          
+//         ],
+//       ),
+//     );
+//   }
+// }
 class AdminDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Admin Dashboard'),
-      ),
-      body: ListView(
-        padding: EdgeInsets.all(20),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => QuizCreationView()),
-              );
-            },
-            child: Text('Create Quiz'),
+          SizedBox(height: 20),
+          Image.asset(
+            'images/online-quiz.gif', // Replace 'your_image.png' with your image asset path
+            height: 150, // Adjust the height as needed
+            width: 150, // Adjust the width as needed
           ),
           SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => QuizList()),
-              );
-            },
-            child: Text('View Quiz List'),
+          ListView(
+            padding: EdgeInsets.all(20),
+            shrinkWrap: true,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => QuizCreationView()),
+                  );
+                },
+                child: Text('Create Quiz'),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => QuizList()),
+                  );
+                },
+                child: Text('View Quiz List'),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ResultsPage()),
+                  );
+                },
+                child: Text('View Results'),
+              ),
+            ],
           ),
-          SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ResultsPage()),
-              );
-            },
-            child: Text('View Results'),
-          ),
-          
         ],
       ),
     );
   }
 }
+
 
 class QuizList extends StatefulWidget {
   @override

@@ -115,7 +115,7 @@ class QuizzesView extends StatelessWidget {
         margin: EdgeInsets.only(bottom: 20),
         padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.7),
+          color: Colors.black.withOpacity(0.7),
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(

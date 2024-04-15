@@ -79,7 +79,7 @@ class _HomepageState extends State<Homepage> {
       key: _scaffoldKey,
       appBar: AppBar(
         title: Text(
-          'Mail App',
+          'Quiz App',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.black,

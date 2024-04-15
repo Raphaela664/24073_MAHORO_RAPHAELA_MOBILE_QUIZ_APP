@@ -95,6 +95,7 @@ flutter:
     - images/quiz.jpeg
     - images/quiz1.jpeg
     - images/quiz_image.jpg
+    - images/online-quiz.gif
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 
